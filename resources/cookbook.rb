@@ -80,17 +80,18 @@ action :create do
     not_if { node.run_state['_pipeline'][new_resource.org].include?(new_resource.name) }
   end
 
+  execute "#{new_resource.name} :: Checkout working branch" do
+    command <<-EOF
+      git fetch -a
+      git checkout master
+      git pull delivery master
+      git checkout -b update-to-#{new_resource.version}
+    EOF
+    cwd "#{new_resource.cwd}/#{new_resource.name}"
+  end
+
   case new_resource.source
   when :supermarket
-    execute "#{new_resource.name} :: Checkout working branch" do
-      command <<-EOF
-        git checkout master
-        git pull delivery master
-        git checkout -b update-to-#{new_resource.version}
-      EOF
-      cwd "#{new_resource.cwd}/#{new_resource.name}"
-    end
-
     log "#{new_resource.name} :: Get version #{new_resource.version} from Supermarket"
 
     tar_extract node.run_state['_pipeline']["universe_#{new_resource.opts[:uri]}"][new_resource.name][new_resource.version]['download_url'] do
@@ -99,8 +100,6 @@ action :create do
       user 'dbuild'
       group 'dbuild'
     end
-
-    # git --no-pager log origin/master..master
   end
 
   execute "#{new_resource.name} :: Commit Changes" do
@@ -109,11 +108,14 @@ action :create do
       git commit -m update-to-#{new_resource.version}
     EOF
     cwd "#{new_resource.cwd}/#{new_resource.name}"
+    not_if 'git update-index -q --ignore-submodules --refresh && git diff-index --quiet delivery/master --'
+    notifies :run, "execute[#{new_resource.name} :: Submit change to Chef Automate Workflow]", :immediately
   end
 
   execute "#{new_resource.name} :: Submit change to Chef Automate Workflow" do
     command 'delivery review --no-spinner --no-open'
     cwd "#{new_resource.cwd}/#{new_resource.name}"
+    action :nothing
   end
 end
 
