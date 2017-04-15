@@ -43,6 +43,7 @@ load_current_value do
 end
 
 action :create do
+  return if new_resource.version.eql?(node.run_state['_pipeline']['cookbooks'][new_resource.name])
   return unless validate_source
 
   if node.run_state['_pipeline']['status'].map { |v| "#{v['project']}-#{v['title']}" }.include?("#{new_resource.name}-update-to-#{new_resource.version}")
