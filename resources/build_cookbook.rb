@@ -37,6 +37,7 @@ action :create do
     owner 'dbuild'
     group 'dbuild'
   end
+
   %w(default deploy functional lint provision publish quality security smoke syntax unit).each do |phase|
     template "#{new_resource.cwd}/.delivery/build_cookbook/recipes/#{phase}.rb" do
       source 'recipe.erb'
@@ -45,6 +46,7 @@ action :create do
       variables phase: phase
     end
   end
+
   %w(chefignore LICENSE metadata.rb).each do |f|
     cookbook_file "#{new_resource.cwd}/.delivery/build_cookbook/#{f}" do
       source f
@@ -52,11 +54,21 @@ action :create do
       group 'dbuild'
     end
   end
+
   %w(config.json project.toml).each do |f|
     cookbook_file "#{new_resource.cwd}/.delivery/#{f}" do
       source f
       owner 'dbuild'
       group 'dbuild'
     end
+  end
+
+  execute "#{new_resource.name} :: Commit build cookbook" do
+    command <<-EOF
+      git add .delivery
+      git commit -m 'Update Automate Workflow build_cookbook'
+    EOF
+    cwd "#{new_resource.cwd}/#{new_resource.name}"
+    only_if { new_resource.resource_updated? }
   end
 end
