@@ -95,9 +95,7 @@ action :create do
 
     tar_extract node.run_state['_pipeline']["universe_#{new_resource.opts[:uri]}"][new_resource.name][new_resource.version]['download_url'] do
       target_dir new_resource.cwd
-    end
-    edit_resource :directory, new_resource.cwd do
-      action :nothing
+      download_dir new_resource.cwd
     end
 
     # git --no-pager log origin/master..master
