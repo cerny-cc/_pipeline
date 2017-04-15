@@ -1,5 +1,5 @@
 #
-# Cookbook:: _project
+# Cookbook:: _pipeline
 # Recipe:: default
 #
 # Copyright:: 2017, Nathan Cerny
@@ -15,3 +15,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+execute 'Configure git' do
+  command <<-EOF
+    git config --global user.email "builder@cerny.cc"
+    git config --global user.name "cerny-cc automated build"
+  EOF
+end

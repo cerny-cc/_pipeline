@@ -1,5 +1,5 @@
 #
-# Cookbook:: _project
+# Cookbook:: _pipeline
 # Recipe:: smoke
 #
 # Copyright:: 2017, Nathan Cerny
