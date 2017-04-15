@@ -1,5 +1,5 @@
 #
-# Cookbook:: _external
+# Cookbook:: _project
 # Library:: helpers
 #
 # Copyright:: 2017, Nathan Cerny
@@ -40,8 +40,8 @@ def delivery_api(method = :get, path = '/_status', data = '')
   end
 end
 
-def supermarket_api(method = :get, path = '', data = '', headers = {})
-  uri = URI.parse('https://supermarket.chef.io/')
+def supermarket_api(method = :get, path = '', data = '', headers = {}, supermarket_url = 'https://supermarket.chef.io/')
+  uri = URI.parse(supermarket_url)
   http_client = Net::HTTP.new(uri.host, uri.port)
 
   http_client.use_ssl = true if uri.scheme == 'https'
