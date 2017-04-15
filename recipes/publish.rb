@@ -56,6 +56,7 @@ DeliverySugar::ChefServer.new(delivery_knife_rb).with_server_config do
   end
 
   external.each do |cb_source, val|
+    next if cb_source.to_sym.eql?(:id)
     val.each do |cb_name, cb_opts|
       cookbook_pipeline cb_name do
         cwd cookbook_directory
