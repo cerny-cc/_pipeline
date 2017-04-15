@@ -38,15 +38,12 @@ load_current_value do
     end
   end
 
-  validate_source
-
   version node.run_state['_pipeline']['cookbooks'][name] || '0.0.0'
   current_value_does_not_exist! unless node.run_state['_pipeline'][org].include?(name)
 end
 
 action :create do
-  supported_sources = [:supermarket]
-  return unless supported_sources.include?(new_resource.source)
+  return unless validate_source
 
   if node.run_state['_pipeline']['status'].map { |v| "#{v['project']}-#{v['title']}" }.include?("#{new_resource.name}-update-to-#{new_resource.version}")
     Chef::Log.info "Change already in-flight to update #{new_resource.name} to #{new_resource.version}"
@@ -130,10 +127,15 @@ def validate_source
       Chef::Log.error "Cookbook #{new_resource.name} is not on supermarket!"
       raise unless node.run_state['_pipeline']['cookbooks'].include?(new_resource.name)
     end
+    true
+  else
+    Chef::Log.warn("Source #{new_resource.source} is not currently supported by the pipeline.")
+    false
   end
 end
 
 def latest_version
+  validate_source
   case new_resource.source
   when :supermarket
     node.run_state['_pipeline']["universe_#{new_resource.opts[:uri]}"][new_resource.name].keys.map { |v| Gem::Version.new(v) }.max.to_s
