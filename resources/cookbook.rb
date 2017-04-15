@@ -1,5 +1,5 @@
 #
-# Cookbook:: _project
+# Cookbook:: _pipeline
 # Resource:: cookbook_pipeline
 #
 # Copyright:: 2017, Nathan Cerny
