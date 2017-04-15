@@ -47,7 +47,7 @@ action :create do
     end
   end
 
-  %w(chefignore LICENSE metadata.rb).each do |f|
+  %w(chefignore LICENSE metadata.rb Berksfile).each do |f|
     cookbook_file "#{new_resource.cwd}/.delivery/build_cookbook/#{f}" do
       source f
       owner 'dbuild'

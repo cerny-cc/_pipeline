@@ -47,7 +47,7 @@ action :create do
 
   if node.run_state['_pipeline']['status'].map { |v| "#{v['project']}-#{v['title']}" }.include?("#{new_resource.name}-update-to-#{new_resource.version}")
     Chef::Log.info "Change already in-flight to update #{new_resource.name} to #{new_resource.version}"
-    return
+    # return
   end
 
   directory "#{new_resource.cwd}/#{new_resource.name}" do
