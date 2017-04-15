@@ -118,27 +118,27 @@ action :delete do
 end
 
 def validate_source
-  case new_resource.source
+  case source
   when :supermarket
-    new_resource.opts[:uri] ||= 'https://supermarket.chef.io/'
-    node.run_state['_pipeline']["universe_#{new_resource.opts[:uri]}"] ||= supermarket_api(:get, '/universe', '', {}, new_resource.opts[:uri])
+    opts[:uri] ||= 'https://supermarket.chef.io/'
+    node.run_state['_pipeline']["universe_#{opts[:uri]}"] ||= supermarket_api(:get, '/universe', '', {}, opts[:uri])
 
-    unless node.run_state['_pipeline']["universe_#{new_resource.opts[:uri]}"].include?(new_resource.name)
-      Chef::Log.error "Cookbook #{new_resource.name} is not on supermarket!"
-      raise unless node.run_state['_pipeline']['cookbooks'].include?(new_resource.name)
+    unless node.run_state['_pipeline']["universe_#{opts[:uri]}"].include?(name)
+      Chef::Log.error "Cookbook #{name} is not on supermarket!"
+      raise unless node.run_state['_pipeline']['cookbooks'].include?(name)
     end
     true
   else
-    Chef::Log.warn("Source #{new_resource.source} is not currently supported by the pipeline.")
+    Chef::Log.warn("Source #{source} is not currently supported by the pipeline.")
     false
   end
 end
 
 def latest_version
   validate_source
-  case new_resource.source
+  case source
   when :supermarket
-    node.run_state['_pipeline']["universe_#{new_resource.opts[:uri]}"][new_resource.name].keys.map { |v| Gem::Version.new(v) }.max.to_s
+    node.run_state['_pipeline']["universe_#{opts[:uri]}"][name].keys.map { |v| Gem::Version.new(v) }.max.to_s
   else
     '0.0.0'
   end
