@@ -1,4 +1,4 @@
-name '_external'
+name '_pipeline'
 maintainer 'Nathan Cerny'
 maintainer_email 'ncerny@gmail.com'
 license 'apachev2'
