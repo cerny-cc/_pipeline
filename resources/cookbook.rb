@@ -21,18 +21,15 @@ default_action :create
 
 property :name, String, name_property: true
 property :cwd, String, required: true
-property :source, [:supermarket, :git, :github], default: :supermarket
+property :source, Symbol, default: :supermarket
 property :opts, Hash
 property :version, String, default: lazy { latest_version }
 property :org, String, default: 'external'
 
 load_current_value do
-  cookbook_source
-
   node.run_state['_pipeline'] ||= {}
   node.run_state['_pipeline'][org] ||= delivery_api(:get, "orgs/#{org}/projects").map { |p| p['name'] }
   node.run_state['_pipeline']['status'] ||= delivery_api(:get, 'pipeline_status')
-  node.run_state['_pipeline']["universe_#{new_resource.opts[:uri]}"] ||= supermarket_api(:get, '/universe', '', {}, new_resource.opts[:uri]) if new_resource.source.eql?(:supermarket)
 
   unless node.run_state['_pipeline'].include?('cookbooks')
     node.run_state['_pipeline']['cookbooks'] = {}
@@ -48,7 +45,9 @@ load_current_value do
 end
 
 action :create do
-  return unless new_resource.source.eql?(:supermarket)
+  supported_sources = [:supermarket]
+  return unless supported_sources.include?(new_resource.source)
+
   if node.run_state['_pipeline']['status'].map { |v| "#{v['project']}-#{v['title']}" }.include?("#{new_resource.name}-update-to-#{new_resource.version}")
     Chef::Log.info "Change already in-flight to update #{new_resource.name} to #{new_resource.version}"
     return
@@ -125,6 +124,8 @@ def validate_source
   case new_resource.source
   when :supermarket
     new_resource.opts[:uri] ||= 'https://supermarket.chef.io/'
+    node.run_state['_pipeline']["universe_#{new_resource.opts[:uri]}"] ||= supermarket_api(:get, '/universe', '', {}, new_resource.opts[:uri])
+
     unless node.run_state['_pipeline']["universe_#{new_resource.opts[:uri]}"].include?(new_resource.name)
       Chef::Log.error "Cookbook #{new_resource.name} is not on supermarket!"
       raise unless node.run_state['_pipeline']['cookbooks'].include?(new_resource.name)
