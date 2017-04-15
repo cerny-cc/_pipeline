@@ -59,7 +59,7 @@ DeliverySugar::ChefServer.new(delivery_knife_rb).with_server_config do
     val.each do |cb_name, cb_opts|
       cookbook_pipeline cb_name do
         cwd cookbook_directory
-        source cb_source
+        source cb_source.to_sym
         opts cb_opts || {}
       end
     end
