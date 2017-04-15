@@ -17,8 +17,7 @@
   },
   "skip_phases": [
     "lint",
-    "unit",
-    "syntax"
+    "unit"
   ],
   "job_dispatch": {
     "version": "v2"
