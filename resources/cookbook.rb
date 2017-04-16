@@ -98,6 +98,8 @@ action :create do
     tar_extract node.run_state['_pipeline']["universe_#{new_resource.opts[:uri]}"][new_resource.name][new_resource.version]['download_url'] do
       target_dir new_resource.cwd
       download_dir new_resource.cwd
+      user 'dbuild'
+      group 'dbuild'
     end
   end
 
