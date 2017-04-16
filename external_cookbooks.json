@@ -1,0 +1,20 @@
+{
+  "supermarket": [
+    "compat_resource",
+    "ohai",
+    "windows",
+    "cron",
+    "logrotate",
+    "delivery-truck",
+    "delivery-sugar",
+    "chef-client",
+    "chocolatey",
+    "chef_client_updater"
+  ],
+  "git": {
+
+  },
+  "github": {
+
+  }
+}
