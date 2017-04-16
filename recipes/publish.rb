@@ -17,21 +17,9 @@
 # limitations under the License.
 
 DeliverySugar::ChefServer.new(delivery_knife_rb).with_server_config do
-  db = 'external_pipeline'
-  dbi = 'cookbooks'
-
   cookbook_directory = File.join(node['delivery']['workspace']['cache'], 'cookbooks')
 
-  chef_data_bag(db) do
-    action :nothing
-  end.run_action(:create)
-
-  chef_data_bag_item("#{db}/#{dbi}") do
-    action :nothing
-    complete false
-  end.run_action(:create)
-
-  external = data_bag_item(db, dbi)
+  external = JSON.parse(::File.read('external_cookbooks.json'))
 
   directory "#{cookbook_directory}/.delivery" do
     recursive true
