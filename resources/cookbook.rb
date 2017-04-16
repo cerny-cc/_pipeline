@@ -98,18 +98,16 @@ action :create do
     tar_extract node.run_state['_pipeline']["universe_#{new_resource.opts[:uri]}"][new_resource.name][new_resource.version]['download_url'] do
       target_dir new_resource.cwd
       download_dir new_resource.cwd
-      user 'dbuild'
-      group 'dbuild'
     end
   end
 
   execute "#{new_resource.name} :: Commit Changes" do
     command <<-EOF
-      git add .
       git commit -m update-to-#{new_resource.version}
     EOF
     cwd "#{new_resource.cwd}/#{new_resource.name}"
-    not_if 'git update-index -q --ignore-submodules --refresh && git diff-index --quiet delivery/master --'
+    # Adding as part of the guard feels dirty, but it makes the recipe more convergent -- we don't have a resource that always runs, or build logic off of unknown wording in future versions of git.
+    not_if 'git add . && git update-index -q --ignore-submodules --refresh && git diff-index --quiet delivery/master --'
     notifies :run, "execute[#{new_resource.name} :: Submit change to Chef Automate Workflow]", :immediately
   end
 
