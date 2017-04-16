@@ -83,7 +83,7 @@ action :create do
 
   execute "#{new_resource.name} :: Checkout working branch" do
     command <<-EOF
-      git fetch -a
+      git fetch --all
       git checkout master
       git pull delivery master
       git checkout -b update-to-#{new_resource.version}
