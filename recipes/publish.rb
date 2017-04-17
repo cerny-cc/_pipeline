@@ -40,6 +40,14 @@ DeliverySugar::ChefServer.new(delivery_knife_rb).with_server_config do
     EOF
   end
 
+  execute 'git config --global user.email "builder@cerny.cc"' do
+    not_if 'git config --get user.email | grep builder@cerny.cc'
+  end
+
+  execute 'git config --global user.name "cerny-cc automated build"' do
+    not_if 'git config --get user.name | grep "cerny-cc automated build"'
+  end
+
   change = ::JSON.parse(::File.read(::File.expand_path('../../../../../../../change.json', node['delivery_builder']['workspace'])))
   directory "#{ENV['HOME']}/.delivery"
   file "#{ENV['HOME']}/.delivery/api-tokens" do
