@@ -142,11 +142,11 @@ def validate_source
 end
 
 def latest_version
-  validate_source
+  source = :other unless validate_source
   case source
   when :supermarket
     node.run_state['_pipeline']["universe_#{opts[:uri]}"][name].keys.map { |v| Gem::Version.new(v) }.max.to_s
   else
-    '0.0.0'
+    node.run_state['_pipeline']['cookbooks'][name] || '0.0.0'
   end
 end
