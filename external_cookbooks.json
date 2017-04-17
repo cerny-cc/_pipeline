@@ -4,6 +4,7 @@
   "github": {
   },
   "supermarket": [
+    "_build",
     "chef-client",
     "chef_client_updater",
     "chocolatey",
@@ -13,6 +14,7 @@
     "delivery-truck",
     "logrotate",
     "ohai",
+    "tar",
     "windows"
   ]
 }
