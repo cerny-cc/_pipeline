@@ -19,7 +19,10 @@
 DeliverySugar::ChefServer.new(delivery_knife_rb).with_server_config do
   cookbook_directory = File.join(node['delivery']['workspace']['cache'], 'cookbooks')
 
-  external = JSON.parse(::File.read('external_cookbooks.json'))
+  Chef::Log.info("pwd:: #{::Dir.getwd}")
+  Chef::Log.info("repo:: #{delivery_workspace_repo}")
+  Chef::Log.info("cache:: #{delivery_workspace_cache}")
+  external = JSON.parse(::File.read("#{delivery_workspace_repo}/external_cookbooks.json"))
 
   directory "#{cookbook_directory}/.delivery" do
     recursive true
