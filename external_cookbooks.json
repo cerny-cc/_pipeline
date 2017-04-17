@@ -1,8 +1,8 @@
 {
   "supermarket": [
+    "compat_resource",
     "delivery-truck",
     "delivery-sugar",
-    "compat_resource",
     "ohai",
     "windows",
     "cron",
