@@ -93,7 +93,7 @@ action :create do
 
   case new_resource.source
   when :supermarket
-    log "#{new_resource.name} :: Get version #{new_resource.version} from Supermarket"
+    Chef::Log.info "#{new_resource.name} :: Get version #{new_resource.version} from Supermarket"
 
     tar_extract node.run_state['_pipeline']["universe_#{new_resource.opts[:uri]}"][new_resource.name][new_resource.version]['download_url'] do
       target_dir new_resource.cwd
@@ -125,15 +125,19 @@ action :delete do
 end
 
 def validate_source
+  Chef::Log.info "Source:: #{source}"
   case source
   when :supermarket
     opts[:uri] ||= 'https://supermarket.chef.io/'
     node.run_state['_pipeline']["universe_#{opts[:uri]}"] ||= supermarket_api(:get, '/universe', '', {}, opts[:uri])
+    Chef::Log.info "URI:: #{opts[:uri]}"
 
     unless node.run_state['_pipeline']["universe_#{opts[:uri]}"].include?(name)
       Chef::Log.error "Cookbook #{name} is not on supermarket!"
       raise unless node.run_state['_pipeline']['cookbooks'].include?(name)
+      return false
     end
+    Chef::Log.info "Universe:: #{node.run_state['_pipeline']["universe_#{opts[:uri]}"][name]}"
     true
   else
     Chef::Log.warn("Source #{source} is not currently supported by the pipeline.")
