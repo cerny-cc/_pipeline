@@ -4,7 +4,23 @@
     "name": "_pipeline",
     "path": "."
   },
-  "skip_phases": [],
+  "delivery-truck": {
+    "lint": {
+      "foodcritic": {
+        "excludes": ["spec", "test"]
+      },
+      "enable_cookstyle": true
+    },
+    "publish": {
+      "github": "cerny-cc/_pipeline",
+      "chef_server": true
+    }
+  },
+  "skip_phases": [
+    "provision",
+    "smoke",
+    "functional"
+  ],
   "job_dispatch": {
     "version": "v2"
   },

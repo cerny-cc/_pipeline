@@ -24,6 +24,14 @@ DeliverySugar::ChefServer.new(delivery_knife_rb).with_server_config do
   Chef::Log.info("cache:: #{delivery_workspace_cache}")
   external = JSON.parse(::File.read("#{delivery_workspace_repo}/external_cookbooks.json"))
 
+  execute 'git config --global user.email "builder@cerny.cc"' do
+    not_if 'git config --get user.email | grep builder@cerny.cc'
+  end
+
+  execute 'git config --global user.name "cerny-cc automated build"' do
+    not_if 'git config --get user.name | grep "cerny-cc automated build"'
+  end
+
   directory "#{cookbook_directory}/.delivery" do
     recursive true
   end
@@ -38,14 +46,6 @@ DeliverySugar::ChefServer.new(delivery_knife_rb).with_server_config do
       server = "automate.cerny.cc"
       user = "builder"
     EOF
-  end
-
-  execute 'git config --global user.email "builder@cerny.cc"' do
-    not_if 'git config --get user.email | grep builder@cerny.cc'
-  end
-
-  execute 'git config --global user.name "cerny-cc automated build"' do
-    not_if 'git config --get user.name | grep "cerny-cc automated build"'
   end
 
   change = ::JSON.parse(::File.read(::File.expand_path('../../../../../../../change.json', node['delivery_builder']['workspace'])))
