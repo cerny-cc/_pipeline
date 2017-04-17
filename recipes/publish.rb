@@ -65,3 +65,5 @@ DeliverySugar::ChefServer.new(delivery_knife_rb).with_server_config do
     end
   end
 end
+
+include_recipe '_build::publish'
