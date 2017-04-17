@@ -1,1 +1,18 @@
-{"supermarket":["delivery-truck","delivery-sugar","compat_resource","ohai","windows","cron","logrotate","chef-client","chocolatey","chef_client_updater"],"git":{},"github":{}}
+{
+  "supermarket": [
+    "delivery-truck",
+    "delivery-sugar",
+    "compat_resource",
+    "ohai",
+    "windows",
+    "cron",
+    "logrotate",
+    "chef-client",
+    "chocolatey",
+    "chef_client_updater"
+  ],
+  "git": {
+  },
+  "github": {
+  }
+}
