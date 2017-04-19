@@ -6,6 +6,7 @@
   "supermarket": [
     "_build",
     "chef-client",
+    "chef-ingredient",
     "chef_client_updater",
     "chocolatey",
     "compat_resource",
