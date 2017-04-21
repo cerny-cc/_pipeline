@@ -32,6 +32,7 @@ load_current_value do
   node.run_state['_pipeline']['status'] ||= delivery_api(:get, 'pipeline_status')
 
   unless node.run_state['_pipeline'].include?('cookbooks')
+    current_value_does_not_exist! unless node.run_state['_pipeline'][org].include?(name)
     node.run_state['_pipeline']['cookbooks'] = {}
     Mixlib::ShellOut.new('knife cookbook list').run_command.stdout.each_line do |line|
       node.run_state['_pipeline']['cookbooks'][line.split[0]] = line.split[1]
@@ -39,7 +40,6 @@ load_current_value do
   end
 
   version node.run_state['_pipeline']['cookbooks'][name] || '0.0.0'
-  current_value_does_not_exist! unless node.run_state['_pipeline'][org].include?(name)
 end
 
 action :create do
@@ -95,7 +95,7 @@ action :create do
   when :supermarket
     Chef::Log.info "#{new_resource.name} :: Get version #{new_resource.version} from Supermarket"
 
-    tar_extract node.run_state['_pipeline']["universe_#{new_resource.opts[:uri]}"][new_resource.name][new_resource.version]['download_url'] do
+    tar_extract node.run_state['_pipeline']['universe'][new_resource.opts[:uri]][new_resource.name][new_resource.version]['download_url'] do
       target_dir new_resource.cwd
       download_dir new_resource.cwd
       user 'dbuild'
@@ -129,15 +129,15 @@ def validate_source
   case source
   when :supermarket
     opts[:uri] ||= 'https://supermarket.chef.io/'
-    node.run_state['_pipeline']["universe_#{opts[:uri]}"] ||= supermarket_api(:get, '/universe', '', {}, opts[:uri])
+    node.run_state['_pipeline']['universe'][opts[:uri]] ||= supermarket_api(:get, '/universe', '', {}, opts[:uri])
     Chef::Log.info "URI:: #{opts[:uri]}"
 
-    unless node.run_state['_pipeline']["universe_#{opts[:uri]}"].include?(name)
+    unless node.run_state['_pipeline']['universe'][opts[:uri]].include?(name)
       Chef::Log.error "Cookbook #{name} is not on supermarket!"
       raise unless node.run_state['_pipeline']['cookbooks'].include?(name)
       return false
     end
-    Chef::Log.info "Universe:: #{node.run_state['_pipeline']["universe_#{opts[:uri]}"][name]}"
+    Chef::Log.info "Universe:: #{node.run_state['_pipeline']['universe'][opts[:uri]][name]}"
     true
   else
     Chef::Log.warn("Source #{source} is not currently supported by the pipeline.")
@@ -147,9 +147,10 @@ end
 
 def latest_version
   source = :other unless validate_source
+  Chef::Log.info "Source(lv):: #{source}"
   case source
   when :supermarket
-    node.run_state['_pipeline']["universe_#{opts[:uri]}"][name].keys.map { |v| Gem::Version.new(v) }.max.to_s
+    node.run_state['_pipeline']['universe'][opts[:uri]][name].keys.map { |v| Gem::Version.new(v) }.max.to_s
   else
     node.run_state['_pipeline']['cookbooks'][name] || '0.0.0'
   end
