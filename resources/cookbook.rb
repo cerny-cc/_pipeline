@@ -28,6 +28,7 @@ property :org, String, default: 'external'
 
 load_current_value do
   node.run_state['_pipeline'] ||= {}
+  node.run_state['_pipeline']['universe'] ||= {}
   node.run_state['_pipeline'][org] ||= delivery_api(:get, "orgs/#{org}/projects").map { |p| p['name'] }
   node.run_state['_pipeline']['status'] ||= delivery_api(:get, 'pipeline_status')
 
