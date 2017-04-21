@@ -29,12 +29,12 @@ property :org, String, default: 'external'
 load_current_value do
   node.run_state['_pipeline'] ||= {}
   node.run_state['_pipeline']['universe'] ||= {}
+  node.run_state['_pipeline']['cookbooks'] ||= {}
   node.run_state['_pipeline'][org] ||= delivery_api(:get, "orgs/#{org}/projects").map { |p| p['name'] }
   node.run_state['_pipeline']['status'] ||= delivery_api(:get, 'pipeline_status')
+  current_value_does_not_exist! unless node.run_state['_pipeline'][org].include?(name)
 
   unless node.run_state['_pipeline'].include?('cookbooks')
-    current_value_does_not_exist! unless node.run_state['_pipeline'][org].include?(name)
-    node.run_state['_pipeline']['cookbooks'] = {}
     Mixlib::ShellOut.new('knife cookbook list').run_command.stdout.each_line do |line|
       node.run_state['_pipeline']['cookbooks'][line.split[0]] = line.split[1]
     end
