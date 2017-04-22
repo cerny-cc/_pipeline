@@ -120,20 +120,12 @@ action :delete do
 end
 
 def validate_source
-  Chef::Log.info "Source:: #{source}"
   case source
   when :supermarket
     opts[:uri] ||= 'https://supermarket.chef.io/'
     node.run_state['_pipeline']['universe'][opts[:uri]] ||= supermarket_api(:get, '/universe', '', {}, opts[:uri])
-    Chef::Log.info "URI:: #{opts[:uri]}"
-
-    unless node.run_state['_pipeline']['universe'][opts[:uri]].include?(name)
-      Chef::Log.error "Cookbook #{name} is not on supermarket!"
-      raise unless node.run_state['_pipeline']['cookbooks'].include?(name)
-      return false
-    end
-    Chef::Log.info "Universe:: #{node.run_state['_pipeline']['universe'][opts[:uri]][name]}"
-    true
+    Chef::Log.error "Cookbook #{name} is not on supermarket!" unless node.run_state['_pipeline']['universe'][opts[:uri]].include?(name)
+    (node.run_state['_pipeline']['universe'][opts[:uri]].include?(name) ? true : false)
   else
     Chef::Log.warn("Source #{source} is not currently supported by the pipeline.")
     false
@@ -141,12 +133,19 @@ def validate_source
 end
 
 def latest_version
-  source = :other unless validate_source
-  Chef::Log.info "Source(lv):: #{source}"
   case source
   when :supermarket
-    node.run_state['_pipeline']['universe'][opts[:uri]][name].keys.map { |v| Gem::Version.new(v) }.max.to_s
+    opts[:uri] ||= 'https://supermarket.chef.io/'
+    node.run_state['_pipeline']['universe'][opts[:uri]] ||= supermarket_api(:get, '/universe', '', {}, opts[:uri])
+
+    if node.run_state['_pipeline']['universe'][opts[:uri]].include?(name)
+      node.run_state['_pipeline']['universe'][opts[:uri]][name].keys.map { |v| Gem::Version.new(v) }.max.to_s
+    elsif node.run_state['_pipeline']['cookbooks'].include?(name)
+      node.run_state['_pipeline']['cookbooks'][name].keys.map { |v| Gem::Version.new(v) }.max.to_s
+    else
+      raise "ERROR: #{name} does not exist in any known source!"
+    end
   else
-    node.run_state['_pipeline']['cookbooks'][name].keys.map { |v| Gem::Version.new(v) }.max.to_s || '0.0.0'
+    Chef::Log.warn("Source #{source} is not currently supported by the pipeline.")
   end
 end
