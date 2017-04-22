@@ -29,22 +29,16 @@ property :org, String, default: 'external'
 load_current_value do
   node.run_state['_pipeline'] ||= {}
   node.run_state['_pipeline']['universe'] ||= {}
-  node.run_state['_pipeline']['cookbooks'] ||= {}
+  node.run_state['_pipeline']['cookbooks'] ||= JSON.parse(Mixlib::ShellOut.new('knife raw universe').run_command.stdout)
   node.run_state['_pipeline'][org] ||= delivery_api(:get, "orgs/#{org}/projects").map { |p| p['name'] }
   node.run_state['_pipeline']['status'] ||= delivery_api(:get, 'pipeline_status')
   current_value_does_not_exist! unless node.run_state['_pipeline'][org].include?(name)
 
-  unless node.run_state['_pipeline'].include?('cookbooks')
-    Mixlib::ShellOut.new('knife cookbook list').run_command.stdout.each_line do |line|
-      node.run_state['_pipeline']['cookbooks'][line.split[0]] = line.split[1]
-    end
-  end
-
-  version node.run_state['_pipeline']['cookbooks'][name] || '0.0.0'
+  version node.run_state['_pipeline']['cookbooks'][name].keys.map { |v| Gem::Version.new(v) }.max.to_s || '0.0.0'
 end
 
 action :create do
-  return if new_resource.version.eql?(node.run_state['_pipeline']['cookbooks'][new_resource.name])
+  return if node.run_state['_pipeline']['cookbooks'][new_resource.name].include?(new_resource.version)
   return unless validate_source
 
   if node.run_state['_pipeline']['status'].map { |v| "#{v['project']}-#{v['title']}" }.include?("#{new_resource.name}-update-to-#{new_resource.version}")
@@ -153,6 +147,6 @@ def latest_version
   when :supermarket
     node.run_state['_pipeline']['universe'][opts[:uri]][name].keys.map { |v| Gem::Version.new(v) }.max.to_s
   else
-    node.run_state['_pipeline']['cookbooks'][name] || '0.0.0'
+    node.run_state['_pipeline']['cookbooks'][name].keys.map { |v| Gem::Version.new(v) }.max.to_s || '0.0.0'
   end
 end
